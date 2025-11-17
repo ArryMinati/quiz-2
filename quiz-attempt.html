@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz Attempt — Q-lytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header quiz-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img class="logo-icon" src="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" alt="Q-lytics logo" />
+        <div class="brand-text">
+          <div class="brand-title">Q-lytics</div>
+          <div class="brand-sub" id="quizTitle">Quiz</div>
+        </div>
+      </div>
+      
+      <div class="quiz-info">
+        <div class="student-name" id="studentName">Student</div>
+        <div class="timer-container">
+          <img class="icon" src="https://cdn-icons-png.flaticon.com/512/2838/2838779.png" alt="">
+          <span id="timer">--:--</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="quiz-container">
+    <div class="quiz-progress">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text">
+        <span>Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span></span>
+      </div>
+    </div>
+
+    <div class="question-container" id="questionContainer">
+      <!-- Question will be displayed here -->
+    </div>
+
+    <div class="quiz-navigation">
+      <button class="btn ghost" id="prevBtn" onclick="previousQuestion()" disabled>
+        Previous
+      </button>
+      <button class="btn primary" id="nextBtn" onclick="nextQuestion()">
+        Next Question
+      </button>
+    </div>
+  </main>
+
+  <!-- Submit Confirmation Modal -->
+  <div id="submitModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Submit Quiz?</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to submit your quiz?</p>
+        <div class="submit-summary" id="submitSummary"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" onclick="closeSubmitModal()">Cancel</button>
+        <button class="btn primary" onclick="confirmSubmit()">Submit Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Modal -->
+  <div id="resultsModal" class="modal-backdrop">
+    <div class="modal large-modal">
+      <div class="modal-header">
+        <h3>Quiz Results</h3>
+      </div>
+      <div class="modal-body">
+        <div class="results-container" id="resultsContainer">
+          <!-- Results will be displayed here -->
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn primary" onclick="exitQuiz()">Exit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="quiz-attempt.js"></script>
+</body>
+</html>

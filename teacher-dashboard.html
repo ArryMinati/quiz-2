@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Teacher Dashboard — Q-lytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img class="logo-icon" src="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" alt="Q-lytics logo" />
+        <div class="brand-text">
+          <div class="brand-title">Q-lytics</div>
+          <div class="brand-sub">Teacher Dashboard</div>
+        </div>
+      </div>
+      <div class="teacher-profile">
+        <span id="teacherName">Welcome, Teacher</span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <div class="dashboard-sidebar">
+      <div class="sidebar-item active" onclick="showSection('create')">
+        <img class="icon" src="https://cdn-icons-png.flaticon.com/512/1250/1250661.png" alt="">
+        Create Quiz
+      </div>
+      <div class="sidebar-item" onclick="showSection('manage')">
+        <img class="icon" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="">
+        Manage Quizzes
+      </div>
+    </div>
+
+    <div class="dashboard-content">
+      <!-- CREATE QUIZ SECTION -->
+      <div id="createSection" class="section active">
+        <div class="section-header">
+          <h2><img class="icon" src="https://cdn-icons-png.flaticon.com/512/1250/1250661.png" alt="">Create New Quiz</h2>
+        </div>
+
+        <div class="quiz-form-card">
+          <div class="field">
+            <label for="quizTitle">Quiz Title</label>
+            <input id="quizTitle" type="text" placeholder="e.g., Math Quiz - Chapter 5" />
+          </div>
+
+          <div class="field">
+            <label for="quizDescription">Description (Optional)</label>
+            <textarea id="quizDescription" placeholder="Brief description of the quiz" rows="2"></textarea>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="quizDuration">Duration (minutes)</label>
+              <input id="quizDuration" type="number" min="1" value="30" />
+            </div>
+            <div class="field">
+              <label>Quiz PIN (Auto-generated)</label>
+              <div class="pin-display" id="generatedPin">----</div>
+            </div>
+          </div>
+
+          <div class="questions-container">
+            <div class="questions-header">
+              <h3>Questions</h3>
+              <button class="btn-add-question" onclick="addQuestion()">
+                <img class="btn-icon" src="https://cdn-icons-png.flaticon.com/512/148/148764.png" alt="">
+                Add Question
+              </button>
+            </div>
+
+            <div id="questionsList">
+              <!-- Questions will be added dynamically -->
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn primary" onclick="createQuiz()">
+              <img class="btn-icon" src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="">
+              Create Quiz
+            </button>
+            <button class="btn ghost" onclick="resetForm()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANAGE QUIZZES SECTION -->
+      <div id="manageSection" class="section">
+        <div class="section-header">
+          <h2><img class="icon" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="">Manage Quizzes</h2>
+        </div>
+
+        <div id="quizzesList" class="quizzes-grid">
+          <!-- Quizzes will be displayed here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Question Modal -->
+  <div id="questionModal" class="modal-backdrop">
+    <div class="modal large-modal">
+      <div class="modal-header">
+        <h3>Add Question</h3>
+        <button class="close-btn" onclick="closeQuestionModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="questionText">Question</label>
+          <textarea id="questionText" placeholder="Enter your question" rows="3"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="questionType">Question Type</label>
+          <select id="questionType" onchange="updateQuestionOptions()">
+            <option value="mcq">Multiple Choice (Single Answer)</option>
+            <option value="multiple">Multiple Choice (Multiple Answers)</option>
+            <option value="true-false">True/False</option>
+            <option value="short">Short Answer</option>
+          </select>
+        </div>
+
+        <div id="optionsContainer" class="options-container">
+          <!-- Options will be added based on question type -->
+        </div>
+
+        <div class="field">
+          <label for="questionPoints">Points</label>
+          <input id="questionPoints" type="number" min="1" value="1" />
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn primary" onclick="saveQuestion()">Save Question</button>
+          <button class="btn ghost" onclick="closeQuestionModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="teacher-dashboard.js"></script>
+</body>
+</html>
