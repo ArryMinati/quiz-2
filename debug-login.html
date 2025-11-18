@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Debugger - Q-lytics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2C5364; }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #2C5364;
+        }
+        .info {
+            padding: 10px;
+            margin: 10px 0;
+            background: #e8f4f8;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .quiz-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .quiz-title {
+            font-weight: 600;
+            color: #2C5364;
+            margin-bottom: 5px;
+        }
+        .quiz-detail {
+            font-size: 14px;
+            color: #666;
+            margin: 3px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            background: #2C5364;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        button:hover {
+            background: #1a3340;
+        }
+        .error { color: #e74c3c; font-weight: 600; }
+        .success { color: #27ae60; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teacher Login & Quiz Debugger</h1>
+        <p>This tool helps debug why quizzes aren't showing for teachers.</p>
+
+        <div class="section">
+            <h3>Current Teacher Info:</h3>
+            <div id="teacherInfo"></div>
+            <button onclick="checkTeacher()">Check Current Teacher</button>
+            <button onclick="clearTeacher()">Clear Teacher Login</button>
+        </div>
+
+        <div class="section">
+            <h3>All Quizzes in Storage:</h3>
+            <div id="allQuizzes"></div>
+            <button onclick="showAllQuizzes()">Show All Quizzes</button>
+        </div>
+
+        <div class="section">
+            <h3>Filtered Quizzes for Current Teacher:</h3>
+            <div id="teacherQuizzes"></div>
+            <button onclick="showTeacherQuizzes()">Show My Quizzes</button>
+        </div>
+
+        <div class="section">
+            <h3>Email Comparison Test:</h3>
+            <div id="emailTest"></div>
+            <button onclick="testEmails()">Test Email Matching</button>
+        </div>
+    </div>
+
+    <script>
+        function checkTeacher() {
+            const teacherData = localStorage.getItem('currentTeacher');
+            const div = document.getElementById('teacherInfo');
+            
+            if (!teacherData) {
+                div.innerHTML = '<div class="error">❌ No teacher logged in!</div>';
+                return;
+            }
+            
+            try {
+                const teacher = JSON.parse(teacherData);
+                div.innerHTML = `
+                    <div class="success">✅ Teacher logged in:</div>
+                    <div class="info">
+                        Name: ${teacher.name}<br>
+                        Email: ${teacher.email}<br>
+                        Raw Data: ${teacherData}
+                    </div>
+                `;
+            } catch (e) {
+                div.innerHTML = `<div class="error">❌ Error parsing teacher data: ${e.message}</div>`;
+            }
+        }
+
+        function clearTeacher() {
+            if (confirm('Clear teacher login?')) {
+                localStorage.removeItem('currentTeacher');
+                document.getElementById('teacherInfo').innerHTML = '<div class="success">✅ Teacher cleared</div>';
+            }
+        }
+
+        function showAllQuizzes() {
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            const div = document.getElementById('allQuizzes');
+            
+            if (quizzes.length === 0) {
+                div.innerHTML = '<div class="error">❌ No quizzes found in storage</div>';
+                return;
+            }
+            
+            div.innerHTML = `
+                <div class="success">✅ Found ${quizzes.length} total quiz${quizzes.length !== 1 ? 'zes' : ''}:</div>
+                ${quizzes.map((q, i) => `
+                    <div class="quiz-item">
+                        <div class="quiz-title">${i + 1}. ${q.title}</div>
+                        <div class="quiz-detail">📌 PIN: ${q.pin}</div>
+                        <div class="quiz-detail">👤 Created By: "${q.createdBy}"</div>
+                        <div class="quiz-detail">📅 Created: ${new Date(q.createdAt).toLocaleString()}</div>
+                        <div class="quiz-detail">❓ Questions: ${q.questions ? q.questions.length : 0}</div>
+                        <div class="quiz-detail">⏱️ Duration: ${q.duration} mins</div>
+                        <div class="quiz-detail">⭐ Featured: ${q.featured ? 'Yes' : 'No'}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function showTeacherQuizzes() {
+            const teacherData = localStorage.getItem('currentTeacher');
+            const div = document.getElementById('teacherQuizzes');
+            
+            if (!teacherData) {
+                div.innerHTML = '<div class="error">❌ No teacher logged in! Login first.</div>';
+                return;
+            }
+            
+            const teacher = JSON.parse(teacherData);
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            
+            const teacherQuizzes = quizzes.filter(q => q.createdBy === teacher.email);
+            
+            if (teacherQuizzes.length === 0) {
+                div.innerHTML = `
+                    <div class="error">❌ No quizzes found for teacher: ${teacher.email}</div>
+                    <div class="info">
+                        Teacher email: "${teacher.email}"<br>
+                        Total quizzes in storage: ${quizzes.length}<br>
+                        <br>
+                        <strong>Checking all quiz creators:</strong><br>
+                        ${quizzes.map((q, i) => `
+                            Quiz ${i + 1}: "${q.createdBy}" ${q.createdBy === teacher.email ? '✅ MATCH' : '❌ NO MATCH'}
+                        `).join('<br>')}
+                    </div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="success">✅ Found ${teacherQuizzes.length} quiz${teacherQuizzes.length !== 1 ? 'zes' : ''} for ${teacher.email}:</div>
+                    ${teacherQuizzes.map((q, i) => `
+                        <div class="quiz-item">
+                            <div class="quiz-title">${i + 1}. ${q.title}</div>
+                            <div class="quiz-detail">📌 PIN: ${q.pin}</div>
+                            <div class="quiz-detail">❓ Questions: ${q.questions.length}</div>
+                            <div class="quiz-detail">⭐ Featured: ${q.featured ? 'Yes' : 'No'}</div>
+                        </div>
+                    `).join('')}
+                `;
+            }
+        }
+
+        function testEmails() {
+            const teacherData = localStorage.getItem('currentTeacher');
+            const div = document.getElementById('emailTest');
+            
+            if (!teacherData) {
+                div.innerHTML = '<div class="error">❌ No teacher logged in! Login first.</div>';
+                return;
+            }
+            
+            const teacher = JSON.parse(teacherData);
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            
+            let html = `<div class="info">Teacher Email: "${teacher.email}"<br>Length: ${teacher.email.length}<br><br>`;
+            
+            quizzes.forEach((q, i) => {
+                const match = q.createdBy === teacher.email;
+                const trimMatch = q.createdBy.trim() === teacher.email.trim();
+                html += `<strong>Quiz ${i + 1}: ${q.title}</strong><br>`;
+                html += `Creator: "${q.createdBy}"<br>`;
+                html += `Length: ${q.createdBy.length}<br>`;
+                html += `Direct Match: ${match ? '✅ YES' : '❌ NO'}<br>`;
+                html += `Trim Match: ${trimMatch ? '✅ YES' : '❌ NO'}<br>`;
+                html += `Char codes: Teacher[${teacher.email.split('').map(c => c.charCodeAt(0)).join(',')}]<br>`;
+                html += `Char codes: Creator[${q.createdBy.split('').map(c => c.charCodeAt(0)).join(',')}]<br><br>`;
+            });
+            
+            html += '</div>';
+            div.innerHTML = html;
+        }
+
+        // Auto-check on load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkTeacher();
+            showAllQuizzes();
+            showTeacherQuizzes();
+        });
+    </script>
+</body>
+</html>

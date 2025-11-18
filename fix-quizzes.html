@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Quiz Data - Q-lytics</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #0F2027, #2C5364);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #2C5364;
+            margin-top: 0;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 8px 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #2C5364;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1a3340;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        .quiz-list {
+            margin: 20px 0;
+        }
+        .quiz-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2C5364;
+        }
+        .quiz-item.featured {
+            border-left-color: #fbbf24;
+            background: #fffbf0;
+        }
+        .quiz-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2C5364;
+            margin-bottom: 5px;
+        }
+        .quiz-info {
+            font-size: 14px;
+            color: #666;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .badge.featured {
+            background: #fbbf24;
+            color: #fff;
+        }
+        .badge.normal {
+            background: #e0e0e0;
+            color: #666;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .actions {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Quiz Data Fixer</h1>
+        <p>This tool helps fix old quizzes that don't have the featured property.</p>
+        
+        <div id="status"></div>
+        
+        <div class="actions">
+            <h3>Actions:</h3>
+            <button class="btn-primary" onclick="checkQuizzes()">🔍 Check All Quizzes</button>
+            <button class="btn-primary" onclick="fixQuizzes()">✅ Fix Missing Properties</button>
+            <button class="btn-secondary" onclick="viewRawData()">📊 View Raw Data</button>
+            <button class="btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+        </div>
+        
+        <div id="quizList" class="quiz-list"></div>
+        <div id="rawData"></div>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.innerHTML = message;
+        }
+
+        function checkQuizzes() {
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            const listDiv = document.getElementById('quizList');
+            
+            if (quizzes.length === 0) {
+                showStatus('❌ No quizzes found in storage!', 'warning');
+                listDiv.innerHTML = '<p>No quizzes to display.</p>';
+                return;
+            }
+
+            let missingFeatured = 0;
+            let hasFeatured = 0;
+            let featuredCount = 0;
+
+            const html = quizzes.map(quiz => {
+                const hasProp = quiz.featured !== undefined;
+                if (!hasProp) missingFeatured++;
+                else hasFeatured++;
+                if (quiz.featured === true) featuredCount++;
+
+                return `
+                    <div class="quiz-item ${quiz.featured ? 'featured' : ''}">
+                        <div class="quiz-title">
+                            ${quiz.title}
+                            ${quiz.featured ? '<span class="badge featured">⭐ Featured</span>' : '<span class="badge normal">Not Featured</span>'}
+                            ${hasProp ? '' : '<span class="badge" style="background:#e74c3c;color:white;">⚠️ Missing Property</span>'}
+                        </div>
+                        <div class="quiz-info">
+                            📌 PIN: ${quiz.pin} | 
+                            ❓ ${quiz.questions ? quiz.questions.length : 0} Questions | 
+                            ⏱️ ${quiz.duration} mins | 
+                            👤 By: ${quiz.createdBy || 'Unknown'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            listDiv.innerHTML = html;
+
+            if (missingFeatured > 0) {
+                showStatus(`
+                    ⚠️ Found ${quizzes.length} total quizzes:<br>
+                    ✅ ${hasFeatured} have featured property<br>
+                    ❌ ${missingFeatured} are missing featured property<br>
+                    ⭐ ${featuredCount} are marked as featured<br><br>
+                    <strong>Click "Fix Missing Properties" to update them.</strong>
+                `, 'warning');
+            } else {
+                showStatus(`
+                    ✅ All ${quizzes.length} quizzes are up to date!<br>
+                    ⭐ ${featuredCount} quiz${featuredCount !== 1 ? 'zes are' : ' is'} marked as featured.
+                `, 'success');
+            }
+        }
+
+        function fixQuizzes() {
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            let fixed = 0;
+
+            const updatedQuizzes = quizzes.map(quiz => {
+                if (quiz.featured === undefined) {
+                    fixed++;
+                    return { ...quiz, featured: false };
+                }
+                return quiz;
+            });
+
+            if (fixed > 0) {
+                localStorage.setItem('quizzes', JSON.stringify(updatedQuizzes));
+                showStatus(`✅ Fixed ${fixed} quiz${fixed !== 1 ? 'zes' : ''}! All quizzes now have the featured property.`, 'success');
+                setTimeout(() => checkQuizzes(), 500);
+            } else {
+                showStatus('✅ Nothing to fix! All quizzes already have the featured property.', 'success');
+            }
+        }
+
+        function viewRawData() {
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            const rawDiv = document.getElementById('rawData');
+            
+            if (quizzes.length === 0) {
+                rawDiv.innerHTML = '<p>No data in storage.</p>';
+                return;
+            }
+
+            rawDiv.innerHTML = `
+                <h3>Raw Data (${quizzes.length} quizzes):</h3>
+                <pre>${JSON.stringify(quizzes, null, 2)}</pre>
+            `;
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ Are you sure you want to delete ALL quiz data? This cannot be undone!')) {
+                localStorage.removeItem('quizzes');
+                localStorage.removeItem('currentTeacher');
+                localStorage.removeItem('currentStudent');
+                showStatus('🗑️ All data cleared!', 'error');
+                document.getElementById('quizList').innerHTML = '';
+                document.getElementById('rawData').innerHTML = '';
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('DOMContentLoaded', () => {
+            showStatus('Ready! Click "Check All Quizzes" to scan your data.', 'success');
+        });
+    </script>
+</body>
+</html>

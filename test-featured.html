@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Featured System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #2C5364;
+            color: white;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #1a3340;
+        }
+        .quiz-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f9f9f9;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .featured {
+            background: #fff9e6;
+            border-left: 4px solid #fbbf24;
+        }
+        .status {
+            color: #666;
+            font-size: 14px;
+        }
+        .featured .status {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+        h2 {
+            color: #2C5364;
+        }
+        #output {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Featured Quiz System Test</h1>
+    
+    <div class="section">
+        <h2>📊 System Status</h2>
+        <button onclick="checkSystem()">Check System</button>
+        <button onclick="clearStorage()">Clear All Data</button>
+        <div id="output"></div>
+    </div>
+
+    <div class="section">
+        <h2>➕ Create Test Quizzes</h2>
+        <button onclick="createTestQuizzes()">Create 3 Sample Quizzes</button>
+        <p style="color: #666; font-size: 14px;">This will create test quizzes in localStorage</p>
+    </div>
+
+    <div class="section">
+        <h2>📚 All Quizzes</h2>
+        <div id="quizzesList"></div>
+    </div>
+
+    <div class="section">
+        <h2>⭐ Featured Quizzes Only</h2>
+        <div id="featuredList"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += message + '\n';
+            console.log(message);
+        }
+
+        function checkSystem() {
+            document.getElementById('output').textContent = '';
+            log('=== System Check ===');
+            
+            // Check localStorage
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            log(`Total quizzes in storage: ${quizzes.length}`);
+            
+            const featured = quizzes.filter(q => q.featured === true);
+            log(`Featured quizzes: ${featured.length}`);
+            
+            // Check if featured property exists
+            quizzes.forEach((q, i) => {
+                log(`Quiz ${i + 1}: "${q.title}" - Featured: ${q.featured === true ? 'YES ⭐' : 'NO'}`);
+            });
+            
+            // Check HTML elements
+            log('\n=== HTML Elements ===');
+            const container = document.getElementById('featuredQuizzesList');
+            log(`Featured contests container exists on main page: ${!!container}`);
+            
+            displayQuizzes();
+        }
+
+        function createTestQuizzes() {
+            const quizzes = [
+                {
+                    id: Date.now().toString(),
+                    title: "Math Quiz - Algebra",
+                    description: "Basic algebra problems",
+                    duration: 30,
+                    pin: "1234",
+                    questions: [
+                        { text: "What is 2+2?", type: "mcq", points: 1, options: ["3", "4", "5"], correctAnswers: [1] }
+                    ],
+                    createdBy: "teacher@test.com",
+                    createdAt: new Date().toISOString(),
+                    attempts: [],
+                    featured: false
+                },
+                {
+                    id: (Date.now() + 1).toString(),
+                    title: "Science Quiz - Physics",
+                    description: "Newton's laws and motion",
+                    duration: 45,
+                    pin: "5678",
+                    questions: [
+                        { text: "What is gravity?", type: "short", points: 2, sampleAnswer: "Force of attraction" }
+                    ],
+                    createdBy: "teacher@test.com",
+                    createdAt: new Date().toISOString(),
+                    attempts: [],
+                    featured: true
+                },
+                {
+                    id: (Date.now() + 2).toString(),
+                    title: "English Quiz - Grammar",
+                    description: "Parts of speech and sentence structure",
+                    duration: 25,
+                    pin: "9012",
+                    questions: [
+                        { text: "Is this correct?", type: "true-false", points: 1, correctAnswer: true }
+                    ],
+                    createdBy: "teacher@test.com",
+                    createdAt: new Date().toISOString(),
+                    attempts: [],
+                    featured: true
+                }
+            ];
+            
+            localStorage.setItem('quizzes', JSON.stringify(quizzes));
+            log('Created 3 test quizzes!');
+            log('- 1 NOT featured');
+            log('- 2 FEATURED');
+            checkSystem();
+        }
+
+        function toggleFeatured(quizId) {
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            const quiz = quizzes.find(q => q.id === quizId);
+            if (!quiz) return;
+            
+            quiz.featured = !quiz.featured;
+            localStorage.setItem('quizzes', JSON.stringify(quizzes));
+            
+            log(`Toggled: "${quiz.title}" - Featured: ${quiz.featured ? 'YES ⭐' : 'NO'}`);
+            displayQuizzes();
+        }
+
+        function displayQuizzes() {
+            const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+            
+            // All quizzes
+            const list = document.getElementById('quizzesList');
+            if (quizzes.length === 0) {
+                list.innerHTML = '<p style="color: #999;">No quizzes yet. Create test quizzes above.</p>';
+            } else {
+                list.innerHTML = quizzes.map(q => `
+                    <div class="quiz-item ${q.featured ? 'featured' : ''}">
+                        <div>
+                            <strong>${q.title}</strong>
+                            <div class="status">${q.featured ? '⭐ Featured' : 'Not Featured'}</div>
+                        </div>
+                        <button onclick="toggleFeatured('${q.id}')">
+                            ${q.featured ? 'Unfeature' : 'Set Featured'}
+                        </button>
+                    </div>
+                `).join('');
+            }
+            
+            // Featured only
+            const featured = quizzes.filter(q => q.featured === true);
+            const featuredList = document.getElementById('featuredList');
+            if (featured.length === 0) {
+                featuredList.innerHTML = '<p style="color: #999;">No featured quizzes. Click "Set Featured" on a quiz above.</p>';
+            } else {
+                featuredList.innerHTML = featured.map(q => `
+                    <div class="quiz-item featured">
+                        <div>
+                            <strong>${q.title}</strong>
+                            <div class="status">⭐ Featured - PIN: ${q.pin}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function clearStorage() {
+            if (confirm('Clear all quiz data?')) {
+                localStorage.removeItem('quizzes');
+                log('Storage cleared!');
+                displayQuizzes();
+            }
+        }
+
+        // Load on page start
+        window.addEventListener('DOMContentLoaded', () => {
+            displayQuizzes();
+            log('Test page loaded. Click "Check System" to run diagnostics.');
+        });
+    </script>
+</body>
+</html>

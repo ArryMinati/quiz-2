@@ -9,6 +9,7 @@ let currentQuestions = [];
 // Check authentication on page load
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
+  migrateOldQuizzes();
   loadQuizzes();
   generateNewPin();
 });
@@ -16,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function checkAuth() {
   const teacher = localStorage.getItem('currentTeacher');
   if (!teacher) {
-    window.location.href = 'index.html.html';
+    window.location.href = 'index.html';
     return;
   }
   currentTeacher = JSON.parse(teacher);
@@ -25,7 +26,25 @@ function checkAuth() {
 
 function logout() {
   localStorage.removeItem('currentTeacher');
-  window.location.href = 'index.html.html';
+  window.location.href = 'index.html';
+}
+
+// Migrate old quizzes to include featured property
+function migrateOldQuizzes() {
+  const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+  let updated = false;
+  
+  const migratedQuizzes = quizzes.map(quiz => {
+    if (quiz.featured === undefined) {
+      updated = true;
+      return { ...quiz, featured: false };
+    }
+    return quiz;
+  });
+  
+  if (updated) {
+    localStorage.setItem('quizzes', JSON.stringify(migratedQuizzes));
+  }
 }
 
 // Generate random 4-digit PIN
@@ -50,6 +69,7 @@ function showSection(section) {
   } else if (section === 'manage') {
     document.getElementById('manageSection').classList.add('active');
     document.querySelectorAll('.sidebar-item')[1].classList.add('active');
+    loadQuizzes(); // Reload fresh data from localStorage
     displayQuizzes();
   }
 }
@@ -315,14 +335,13 @@ function loadQuizzes() {
 
 function displayQuizzes() {
   const container = document.getElementById('quizzesList');
-  const teacherQuizzes = quizzes.filter(q => q.createdBy === currentTeacher.email);
   
-  if (teacherQuizzes.length === 0) {
+  if (quizzes.length === 0) {
     container.innerHTML = '<div class="no-quizzes">No quizzes created yet. Create your first quiz!</div>';
     return;
   }
   
-  container.innerHTML = teacherQuizzes.map(quiz => `
+  container.innerHTML = quizzes.map(quiz => `
     <div class="quiz-card ${quiz.featured ? 'featured' : ''}">
       <div class="quiz-card-header">
         <h3>${quiz.title}</h3>
@@ -330,6 +349,11 @@ function displayQuizzes() {
       </div>
       <div class="quiz-card-body">
         ${quiz.description ? `<p>${quiz.description}</p>` : ''}
+        <div class="quiz-meta-info">
+          <div style="font-size: 13px; color: #666; margin-bottom: 8px;">
+            👤 Created by: ${quiz.createdBy || 'Unknown'}
+          </div>
+        </div>
         <div class="quiz-stats">
           <span><img class="icon" src="https://cdn-icons-png.flaticon.com/512/2965/2965358.png" alt="">${quiz.questions.length} Questions</span>
           <span><img class="icon" src="https://cdn-icons-png.flaticon.com/512/2838/2838779.png" alt="">${quiz.duration} mins</span>

@@ -36,6 +36,9 @@ function redirectLogin(userType) {
 
 // Contact form submission
 document.addEventListener('DOMContentLoaded', () => {
+  // Migrate old quizzes first
+  migrateOldQuizzes();
+  
   // Load featured contests on homepage
   loadFeaturedContests();
   
@@ -287,6 +290,24 @@ window.addEventListener("keydown", e => {
     if(modalBackdropTeacher.classList.contains("open")) closeTeacherLogin();
   }
 });
+
+// Migrate old quizzes to include featured property
+function migrateOldQuizzes() {
+  const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+  let updated = false;
+  
+  const migratedQuizzes = quizzes.map(quiz => {
+    if (quiz.featured === undefined) {
+      updated = true;
+      return { ...quiz, featured: false };
+    }
+    return quiz;
+  });
+  
+  if (updated) {
+    localStorage.setItem('quizzes', JSON.stringify(migratedQuizzes));
+  }
+}
 
 // Load Featured Contests
 function loadFeaturedContests() {
