@@ -20,7 +20,7 @@ function checkAuth() {
   const quizPin = localStorage.getItem('currentQuizPin');
   
   if (!student || !quizPin) {
-    window.location.href = 'index.html.html';
+    window.location.href = 'index.html';
     return;
   }
   
@@ -33,7 +33,7 @@ function checkAuth() {
   
   if (!currentQuiz) {
     alert('Quiz not found!');
-    window.location.href = 'index.html.html';
+    window.location.href = 'index.html';
     return;
   }
   
@@ -333,7 +333,7 @@ function displayResults(scorePercentage, earnedPoints, totalPoints, results) {
 function exitQuiz() {
   localStorage.removeItem('currentStudent');
   localStorage.removeItem('currentQuizPin');
-  window.location.href = 'index.html.html';
+  window.location.href = 'index.html';
 }
 
 // Toast helper
