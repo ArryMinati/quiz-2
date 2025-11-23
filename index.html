@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -114,15 +114,15 @@
               </div>
 
               <div class="field">
-                <label for="stuQuizPin">Quiz PIN</label>
-                <input id="stuQuizPin" type="text" placeholder="Enter 4-digit quiz PIN" maxlength="4" />
-                <div class="otp-note">Ask your teacher for the quiz PIN.</div>
+                <label for="stuQuizPin">Quiz PIN (Optional)</label>
+                <input id="stuQuizPin" type="text" placeholder="Enter 4-digit quiz PIN (optional)" maxlength="4" />
+                <div class="otp-note">Enter quiz PIN to join directly, or leave blank to access your dashboard.</div>
               </div>
 
               <div class="modal-actions">
                 <button type="button" class="btn primary" onclick="sendOtp()">Send OTP</button>
                 <input id="otpInput" type="text" placeholder="Enter OTP" style="flex:1;min-width:120px;padding:8px 10px;border-radius:8px;border:1px solid #e6eef0;" />
-                <button type="button" class="btn ghost" onclick="verifyAndProceed()">Verify & Join</button>
+                <button type="button" class="btn ghost" onclick="verifyAndProceed()">Verify & Login</button>
               </div>
             </div>
           </div>

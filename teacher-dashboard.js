@@ -71,6 +71,11 @@ function showSection(section) {
     document.querySelectorAll('.sidebar-item')[1].classList.add('active');
     loadQuizzes(); // Reload fresh data from localStorage
     displayQuizzes();
+  } else if (section === 'scoreboard') {
+    document.getElementById('scoreboardSection').classList.add('active');
+    document.querySelectorAll('.sidebar-item')[2].classList.add('active');
+    loadQuizzes(); // Reload fresh data from localStorage
+    displayScoreboard();
   }
 }
 
@@ -313,10 +318,9 @@ function createQuiz() {
   
   showToast('Quiz created successfully! PIN: ' + pin);
   
-  // Show detailed info
-  alert(`Quiz Created Successfully!\n\nTitle: ${title}\nPIN: ${pin}\nQuestions: ${currentQuestions.length}\nDuration: ${duration} minutes\n\nShare this PIN with your students.`);
+  // Show clean modal with quiz info
+  showQuizCreatedModal(title, pin, currentQuestions.length, duration);
   
-  resetForm();
   quizzes = existingQuizzes;
 }
 
@@ -424,4 +428,196 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// Quiz Created Modal
+function showQuizCreatedModal(title, pin, questionCount, duration) {
+  document.getElementById('createdQuizTitle').textContent = title;
+  document.getElementById('createdQuizPin').textContent = pin;
+  document.getElementById('createdQuizQuestions').textContent = questionCount;
+  document.getElementById('createdQuizDuration').textContent = `${duration} minutes`;
+  
+  const modal = document.getElementById('quizCreatedModal');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeQuizCreatedModal(createAnother) {
+  const modal = document.getElementById('quizCreatedModal');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  
+  if (createAnother) {
+    resetForm();
+    showSection('create');
+  } else {
+    showSection('manage');
+  }
+}
+
+// Scoreboard functionality
+function displayScoreboard() {
+  const container = document.getElementById('scoreboardContainer');
+  
+  const teacherQuizzes = quizzes.filter(q => q.createdBy === currentTeacher.email);
+  
+  if (teacherQuizzes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <img class="empty-icon" src="https://cdn-icons-png.flaticon.com/512/2942/2942156.png" alt="">
+        <h3>No Quizzes Yet</h3>
+        <p>Create a quiz to see student scores here</p>
+        <button class="btn primary" onclick="showSection('create')">Create Quiz</button>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '';
+  
+  teacherQuizzes.forEach(quiz => {
+    const attempts = quiz.attempts || [];
+    const totalAttempts = attempts.length;
+    
+    html += `
+      <div class="scoreboard-card">
+        <div class="scoreboard-header">
+          <div>
+            <h3>${quiz.title}</h3>
+            <div class="quiz-meta">
+              <span>PIN: <strong>${quiz.pin}</strong></span>
+              <span>•</span>
+              <span>${quiz.questions.length} questions</span>
+              <span>•</span>
+              <span>${totalAttempts} attempt${totalAttempts !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
+        </div>
+        
+        ${totalAttempts === 0 ? `
+          <div class="no-attempts">
+            <p>📊 No students have attempted this quiz yet</p>
+          </div>
+        ` : `
+          <div class="attempts-list">
+            ${attempts.map((attempt, attemptIndex) => {
+              const date = new Date(attempt.completedAt);
+              const scoreClass = attempt.score >= 70 ? 'pass' : attempt.score >= 50 ? 'average' : 'fail';
+              const correctCount = attempt.results ? attempt.results.filter(r => r.isCorrect === true).length : 0;
+              const totalQuestions = attempt.results ? attempt.results.length : quiz.questions.length;
+              
+              return `
+                <div class="attempt-card">
+                  <div class="attempt-summary" onclick="toggleAttemptDetails('${quiz.id}', ${attemptIndex})">
+                    <div class="attempt-student-info">
+                      <div class="student-avatar">${attempt.studentName.charAt(0).toUpperCase()}</div>
+                      <div>
+                        <div class="attempt-student-name">${attempt.studentName}</div>
+                        <div class="attempt-student-email">${attempt.studentEmail}</div>
+                      </div>
+                    </div>
+                    <div class="attempt-stats">
+                      <div class="stat-item">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value">
+                          <span class="score-badge ${scoreClass}">${attempt.score.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                      <div class="stat-item">
+                        <div class="stat-label">Correct</div>
+                        <div class="stat-value">${correctCount}/${totalQuestions}</div>
+                      </div>
+                      <div class="stat-item">
+                        <div class="stat-label">Points</div>
+                        <div class="stat-value">${attempt.earnedPoints}/${attempt.totalPoints}</div>
+                      </div>
+                      <div class="stat-item">
+                        <div class="stat-label">Completed</div>
+                        <div class="stat-value">${date.toLocaleDateString()}<br>${date.toLocaleTimeString()}</div>
+                      </div>
+                    </div>
+                    <div class="expand-icon" id="expand-icon-${quiz.id}-${attemptIndex}">▼</div>
+                  </div>
+                  
+                  <div class="attempt-details" id="attempt-details-${quiz.id}-${attemptIndex}" style="display: none;">
+                    <h4>📝 Question-by-Question Breakdown</h4>
+                    ${attempt.results ? attempt.results.map((result, qIndex) => {
+                      const isCorrect = result.isCorrect === true;
+                      const needsReview = result.isCorrect === null;
+                      const isWrong = result.isCorrect === false;
+                      
+                      return `
+                        <div class="question-result ${isCorrect ? 'correct' : needsReview ? 'review' : 'incorrect'}">
+                          <div class="question-result-header">
+                            <span class="question-number">Q${qIndex + 1}</span>
+                            <span class="question-status-badge">
+                              ${isCorrect ? '✓ Correct' : needsReview ? '⚠ Needs Review' : '✗ Incorrect'}
+                            </span>
+                            <span class="question-points">${isCorrect ? result.points : 0}/${result.points} pts</span>
+                          </div>
+                          <div class="question-text">${result.question}</div>
+                          <div class="answer-comparison">
+                            <div class="student-answer">
+                              <strong>Student's Answer:</strong>
+                              <div class="answer-value ${isCorrect ? 'correct-answer' : 'wrong-answer'}">
+                                ${formatAnswer(result.studentAnswer, result.type)}
+                              </div>
+                            </div>
+                            ${!isCorrect && !needsReview ? `
+                              <div class="correct-answer-display">
+                                <strong>Correct Answer:</strong>
+                                <div class="answer-value correct-answer">
+                                  ${formatAnswer(result.correctAnswer, result.type)}
+                                </div>
+                              </div>
+                            ` : ''}
+                            ${needsReview ? `
+                              <div class="review-note">
+                                <strong>⚠️ Short Answer - Requires Manual Review</strong>
+                              </div>
+                            ` : ''}
+                          </div>
+                        </div>
+                      `;
+                    }).join('') : '<p>No detailed results available</p>'}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+function toggleAttemptDetails(quizId, attemptIndex) {
+  const details = document.getElementById(`attempt-details-${quizId}-${attemptIndex}`);
+  const icon = document.getElementById(`expand-icon-${quizId}-${attemptIndex}`);
+  
+  if (details.style.display === 'none') {
+    details.style.display = 'block';
+    icon.textContent = '▲';
+  } else {
+    details.style.display = 'none';
+    icon.textContent = '▼';
+  }
+}
+
+function formatAnswer(answer, type) {
+  if (answer === undefined || answer === null) {
+    return '<em style="color: #9ca3af;">No answer provided</em>';
+  }
+  
+  if (type === 'multiple' && Array.isArray(answer)) {
+    return answer.join(', ') || '<em style="color: #9ca3af;">No answer</em>';
+  }
+  
+  if (type === 'true-false') {
+    return answer === 'true' ? 'True' : answer === 'false' ? 'False' : answer;
+  }
+  
+  return answer || '<em style="color: #9ca3af;">No answer provided</em>';
 }

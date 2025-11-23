@@ -331,9 +331,24 @@ function displayResults(scorePercentage, earnedPoints, totalPoints, results) {
 }
 
 function exitQuiz() {
-  localStorage.removeItem('currentStudent');
+  // Check if student is logged in
+  const student = localStorage.getItem('currentStudent');
+  
   localStorage.removeItem('currentQuizPin');
-  window.location.href = 'index.html';
+  
+  if (student) {
+    // Student is logged in, go to their dashboard
+    window.location.href = 'student-dashboard.html';
+  } else {
+    // No student session, go to homepage
+    window.location.href = 'index.html';
+  }
+}
+
+function stayOnPage() {
+  // Close modal and allow user to review their results
+  document.getElementById('resultsModal').classList.remove('open');
+  showToast('You can review your results. Refresh the page to take another quiz.');
 }
 
 // Toast helper

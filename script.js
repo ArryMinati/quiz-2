@@ -210,31 +210,45 @@ function verifyAndProceed(){
   const email = document.getElementById("stuEmail").value.trim();
   const quizPin = document.getElementById("stuQuizPin").value.trim();
 
-  if(!name || !email || !quizPin) return showToast("Enter all fields");
+  if(!name || !email) return showToast("Enter name & email");
   if(!_currentOtp) return showToast("Send OTP first");
   if(entered.length < 6) return showToast("Enter full OTP");
-  if(quizPin.length !== 4) return showToast("Enter valid 4-digit PIN");
 
   if(entered === _currentOtp){
-    // Verify quiz PIN
-    const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
-    const quiz = quizzes.find(q => q.pin === quizPin);
-    
-    if(!quiz) {
-      showToast("Invalid quiz PIN");
-      return;
-    }
-    
-    // Store student info and redirect to quiz
+    // Store student info
     const student = { name, email };
     localStorage.setItem('currentStudent', JSON.stringify(student));
-    localStorage.setItem('currentQuizPin', quizPin);
     
-    closeStudentLogin();
-    showToast("Verified — joining quiz...");
-    setTimeout(() => {
-      window.location.href = 'quiz-attempt.html';
-    }, 500);
+    // If quiz PIN is provided, verify and redirect to quiz
+    if(quizPin) {
+      if(quizPin.length !== 4) {
+        showToast("Enter valid 4-digit PIN");
+        return;
+      }
+      
+      const quizzes = JSON.parse(localStorage.getItem('quizzes') || '[]');
+      const quiz = quizzes.find(q => q.pin === quizPin);
+      
+      if(!quiz) {
+        showToast("Invalid quiz PIN");
+        return;
+      }
+      
+      localStorage.setItem('currentQuizPin', quizPin);
+      
+      closeStudentLogin();
+      showToast("Verified — joining quiz...");
+      setTimeout(() => {
+        window.location.href = 'quiz-attempt.html';
+      }, 500);
+    } else {
+      // No quiz PIN, redirect to student dashboard
+      closeStudentLogin();
+      showToast("Verified — opening dashboard...");
+      setTimeout(() => {
+        window.location.href = 'student-dashboard.html';
+      }, 500);
+    }
   } else showToast("Incorrect OTP");
 }
 

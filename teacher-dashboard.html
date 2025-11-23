@@ -34,6 +34,10 @@
         <img class="icon" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="">
         Manage Quizzes
       </div>
+      <div class="sidebar-item" onclick="showSection('scoreboard')">
+        <img class="icon" src="https://cdn-icons-png.flaticon.com/512/2942/2942156.png" alt="">
+        Scoreboard
+      </div>
     </div>
 
     <div class="dashboard-content">
@@ -99,6 +103,17 @@
           <!-- Quizzes will be displayed here -->
         </div>
       </div>
+
+      <!-- SCOREBOARD SECTION -->
+      <div id="scoreboardSection" class="section">
+        <div class="section-header">
+          <h2><img class="icon" src="https://cdn-icons-png.flaticon.com/512/2942/2942156.png" alt="">Scoreboard</h2>
+        </div>
+
+        <div id="scoreboardContainer">
+          <!-- Scoreboard will be displayed here -->
+        </div>
+      </div>
     </div>
   </main>
 
@@ -137,6 +152,40 @@
         <div class="modal-actions">
           <button class="btn primary" onclick="saveQuestion()">Save Question</button>
           <button class="btn ghost" onclick="closeQuestionModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Created Success Modal -->
+  <div id="quizCreatedModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>✅ Quiz Created Successfully!</h3>
+      </div>
+      <div class="modal-body">
+        <div class="quiz-info-card">
+          <div class="info-row">
+            <span class="info-label">Title:</span>
+            <span class="info-value" id="createdQuizTitle"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">PIN:</span>
+            <span class="info-value pin-highlight" id="createdQuizPin"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Questions:</span>
+            <span class="info-value" id="createdQuizQuestions"></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Duration:</span>
+            <span class="info-value" id="createdQuizDuration"></span>
+          </div>
+        </div>
+        <p class="share-message">📤 Share this PIN with your students to start the quiz!</p>
+        <div class="modal-actions">
+          <button class="btn primary" onclick="closeQuizCreatedModal(true)">Create Another Quiz</button>
+          <button class="btn ghost" onclick="closeQuizCreatedModal(false)">View My Quizzes</button>
         </div>
       </div>
     </div>

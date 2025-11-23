@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Dashboard — Q-lytics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand">
+        <img class="logo-icon" src="https://cdn-icons-png.flaticon.com/512/1995/1995574.png" alt="Q-lytics logo" />
+        <div class="brand-text">
+          <div class="brand-title">Q-lytics</div>
+          <div class="brand-sub">Student Dashboard</div>
+        </div>
+      </div>
+      <div class="teacher-profile">
+        <span id="studentName">Welcome, Student</span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <div class="dashboard-sidebar">
+      <div class="sidebar-item active" onclick="showSection('take-quiz')">
+        <img class="icon" src="https://cdn-icons-png.flaticon.com/512/3131/3131589.png" alt="">
+        Take Quiz
+      </div>
+      <div class="sidebar-item" onclick="showSection('my-results')">
+        <img class="icon" src="https://cdn-icons-png.flaticon.com/512/2942/2942156.png" alt="">
+        My Results
+      </div>
+    </div>
+
+    <div class="dashboard-content">
+      <!-- TAKE QUIZ SECTION -->
+      <div id="takeQuizSection" class="section active">
+        <div class="section-header">
+          <h2><img class="icon" src="https://cdn-icons-png.flaticon.com/512/3131/3131589.png" alt="">Take a Quiz</h2>
+        </div>
+
+        <div class="quiz-form-card">
+          <p style="color: #6b7280; margin-bottom: 20px;">Enter the quiz PIN provided by your teacher to start the quiz.</p>
+          
+          <div class="field">
+            <label for="quizPin">Quiz PIN</label>
+            <input id="quizPin" type="text" placeholder="Enter 4-digit PIN" maxlength="4" />
+          </div>
+
+          <div class="form-actions">
+            <button class="btn primary" onclick="startQuizByPin()">
+              <img class="btn-icon" src="https://cdn-icons-png.flaticon.com/512/190/190411.png" alt="">
+              Start Quiz
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY RESULTS SECTION -->
+      <div id="myResultsSection" class="section">
+        <div class="section-header">
+          <h2><img class="icon" src="https://cdn-icons-png.flaticon.com/512/2942/2942156.png" alt="">My Quiz Results</h2>
+        </div>
+
+        <div id="resultsContainer">
+          <!-- Results will be displayed here -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="student-dashboard.js"></script>
+</body>
+</html>
